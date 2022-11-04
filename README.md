@@ -7,7 +7,8 @@ Use the following commands to download and compile the package. [Catkin_tools](h
 ```
 cd catkin_ws/src/
 git clone https://github.com/jkk-research/loomo_base
-catkin build loomo_base
+ git clone https://github.com/szenergy/rviz_markers
+catkin build loomo_base rviz_markers
 ```
 Don't forget to source 😉
 
@@ -25,3 +26,22 @@ sudo apt-get install ros-melodic-joy
 - https://github.com/mit-acl/android_loomo_ros_core
 
 ![](etc/loomo01.svg)
+
+
+```mermaid
+  journey
+    title IP adresses
+    section Robot (android)
+      192.168.42.129: 5: 
+    section Jetson (loomo, roscore)
+      192.168.42.151: 5: 
+    section Laptop
+      192.168.42.216: 4: 
+```
+
+
+
+
+```
+ssh loomo@192.168.42.151
+```

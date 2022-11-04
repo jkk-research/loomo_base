@@ -1,0 +1,3 @@
+<launch>
+    <node name="rviz_config" pkg="rviz" type="rviz"  args="-d $(find loomo_base)/launch/rviz1.rviz" output="screen"/>
+</launch>

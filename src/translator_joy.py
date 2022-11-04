@@ -13,8 +13,8 @@ class Translator:
     def callbackJoy(self, message):
         #rospy.loginfo("new message: %.2f %.2f" % (message.axes[0], message.axes[1]))
         twistCmd = Twist()
-        twistCmd.linear.x = message.axes[0]
-        twistCmd.angular.z = message.axes[1]
+        twistCmd.linear.x = message.axes[1]
+        twistCmd.angular.z = message.axes[0]
         self.pubA.publish(twistCmd)
 
 if __name__ == '__main__':

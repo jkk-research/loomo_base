@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="rviz_markers" type="loomo" name="loomo_f" output="screen">
+            <param name="frame_id" value="LO01_base_link"/>
+    </node>
+</launch>
