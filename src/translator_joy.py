@@ -19,6 +19,7 @@ class Translator:
 
 if __name__ == '__main__':
     rospy.init_node("translator_joystick")
+    rospy.autorepeat_rate= 10
     rospy.loginfo("Loomo translator_joystick started")
     t = Translator()
     rospy.spin()

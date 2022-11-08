@@ -5,6 +5,7 @@
       <param name="dev" type="string" value="/dev/input/js1" />
       -->
       <param name="deadzone" type="double" value="0.0004" />
+      <param name="autorepeat_rate" value="10"/>
   </node>
   <node pkg="loomo_base" type="translator_joy.py" name="tr_joy1" output="screen" /> 
 </launch>
