@@ -6,6 +6,8 @@ from tf2_msgs.msg import TFMessage
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Twist
 from math import atan2, sqrt, pow
+import os
+import yaml
 
 def newOdom(msg):
     global x
@@ -23,8 +25,24 @@ def newOdom(msg):
 def distance(actual, goal):
     return sqrt(pow(actual[0]-goal.x, 2)+pow(actual[1]-goal.y, 2))
 
+def loadCoordinates(filePath):
+    print(f"Opening: {filePath}...")
+    with open(filePath) as f:
+        data = yaml.load(f, Loader=yaml.SafeLoader)
+    print(data)
+    return data
+        
 
 if __name__ == '__main__':
+
+    yamlFile = "goal_points.yaml"
+    scriptDir = os.path.dirname(os.path.realpath(__file__))
+    resourceDir = scriptDir+"/../config/"
+    filePath= resourceDir+yamlFile
+
+    goal_points = loadCoordinates(filePath)
+    pointIdx = 0
+
     x = 0.0
     y = 0.0 
     theta = 0.0
@@ -32,8 +50,10 @@ if __name__ == '__main__':
     speed = Twist()
 
     goal = Point()
-    goal.x = 0.0
-    goal.y = 0.3
+    goal.x = goal_points[pointIdx][0]
+    goal.y = goal_points[pointIdx][1]
+
+    print(goal)
 
     rospy.init_node("speed_controller")
 
@@ -48,15 +68,22 @@ if __name__ == '__main__':
         angle_to_goal = atan2(inc_y, inc_x)
         actual_point = (x, y)
 
-        if distance(actual_point, goal) > 0.5:
+        if distance(actual_point, goal) > 0.25:
             if abs(angle_to_goal - theta) > 0.1:
                 speed.linear.x = 0.0
                 speed.angular.z = 0.3
             else:
                 speed.linear.x = 0.1
                 speed.angular.z = 0.0
+            pub.publish(speed)
+        elif pointIdx < len(goal_points):
+            goal.x = goal_points[pointIdx][0]
+            goal.y = goal_points[pointIdx][1]
+            pointIdx += 1
 
-        
         print(distance(actual_point, goal))
-        pub.publish(speed)
+        print(" Goal:\n", '"', goal.x, goal.y, '"', "Idx:",pointIdx)
+        
+        
+        
         r.sleep()  
