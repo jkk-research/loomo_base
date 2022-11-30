@@ -58,7 +58,6 @@ if __name__ == '__main__':
     rospy.init_node("speed_controller")
 
     r = rospy.Rate(4)
-    # sub = rospy.Subscriber("/odometry/filtered", Odometry, newOdom)
     sub = rospy.Subscriber("/tf", TFMessage, newOdom)
     pub = rospy.Publisher("/LO01/cmd_vel", Twist, queue_size = 1)
     while not rospy.is_shutdown():
