@@ -5,6 +5,8 @@ from nav_msgs.msg import Odometry
 from tf2_msgs.msg import TFMessage
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Twist
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
 from math import atan2, sqrt, pow
 import os
 import yaml
@@ -56,11 +58,64 @@ if __name__ == '__main__':
 
     print(goal)
 
+    marker_array = MarkerArray()
+    
+    idNum = 0
+    for points in goal_points:
+        marker_all = Marker()
+        marker_all.header.frame_id = "map"
+        marker_all.type = 3
+        marker_all.id = idNum
+        marker_all.scale.x = 0.1
+        marker_all.scale.y = 0.1
+        marker_all.scale.z = 1.0
+
+        marker_all.color.r = 1.0
+        marker_all.color.g = 0.0
+        marker_all.color.b = 0.0
+        marker_all.color.a = 1.0
+
+        marker_all.pose.position.x = points[0]
+        marker_all.pose.position.y = points[1]
+        marker_all.pose.position.z = 0
+
+        marker_all.pose.orientation.x = 0.0
+        marker_all.pose.orientation.y = 0.0
+        marker_all.pose.orientation.z = 0.0
+        marker_all.pose.orientation.w = 1.0
+
+        marker_array.markers.append(marker_all)
+        idNum += 1
+
+    marker = Marker()
+    marker.header.frame_id = "map"
+    marker.type = 3
+    marker.scale.x = 0.1
+    marker.scale.y = 0.1
+    marker.scale.z = 1.0
+
+    marker.color.r = 0.0
+    marker.color.g = 1.0
+    marker.color.b = 0.0
+    marker.color.a = 1.0
+
+    marker.pose.position.x = goal.x
+    marker.pose.position.y = goal.y
+    marker.pose.position.z = 0
+
+    marker.pose.orientation.x = 0.0
+    marker.pose.orientation.y = 0.0
+    marker.pose.orientation.z = 0.0
+    marker.pose.orientation.w = 1.0
+
     rospy.init_node("speed_controller")
 
     r = rospy.Rate(4)
     sub = rospy.Subscriber("/tf", TFMessage, newOdom)
     pub = rospy.Publisher("/LO01/cmd_vel", Twist, queue_size = 1)
+    pub_marker = rospy.Publisher("/actual_goal_point", Marker, queue_size = 1)
+    pub_markerArray = rospy.Publisher("/all_goal_points", MarkerArray, queue_size = 4)
+
     while not rospy.is_shutdown():
         inc_x = goal.x -x
         inc_y = goal.y -y
@@ -83,7 +138,7 @@ if __name__ == '__main__':
 
         print(distance(actual_point, goal))
         print(" Goal:\n", '"', goal.x, goal.y, '"', "Idx:",pointIdx)
-        
-        
+        pub_marker.publish(marker)
+        pub_markerArray.publish(marker_array)
         
         r.sleep()  

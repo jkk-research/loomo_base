@@ -8,6 +8,7 @@ import os
 def callback(msg):
     global waypoint
     waypoint.append([msg.pose.position.x, msg.pose.position.y])
+    rospy.loginfo(f"{msg.pose.position.x} {msg.pose.position.y}")
 
 def savePoints(points):
     yamlFile = "goal_points.yaml"
