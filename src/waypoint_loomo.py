@@ -41,6 +41,7 @@ if __name__ == '__main__':
     filePath= resourceDir+yamlFile
 
     goal_points = loadCoordinates(filePath)
+    print(goal_points)
     pointIdx = 0
 
     x = 0.0
