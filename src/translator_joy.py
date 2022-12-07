@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist
 
 class Translator:
     def __init__(self):
-        self.subA = rospy.Subscriber("joy", Joy, self.callbackJoy)
+        self.subA = rospy.Subscriber("/joy", Joy, self.callbackJoy)
         self.pubA = rospy.Publisher("/LO01/cmd_vel", Twist, queue_size=1)
         #rospy.loginfo("init")
     

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import rospy
-from nav_msgs.msg import Odometry
 from tf2_msgs.msg import TFMessage
 from tf.transformations import euler_from_quaternion
-from geometry_msgs.msg import Point, Twist
+from geometry_msgs.msg import Point, Twist, TransformStamped
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 from math import atan2, sqrt, pow
+import tf
 import os
 import yaml
 
@@ -34,6 +34,9 @@ def loadCoordinates(filePath):
     print(data)
     return data
         
+def initPosition(msg):
+    print("Initializin starting position frame")
+    print(msg.transforms[1].header.frame_id)
 
 if __name__ == '__main__':
 
@@ -63,7 +66,7 @@ if __name__ == '__main__':
     idNum = 0
     for points in goal_points:
         marker_all = Marker()
-        marker_all.header.frame_id = "map"
+        marker_all.header.frame_id = "LO01_odom"
         marker_all.type = 3
         marker_all.id = idNum
         marker_all.scale.x = 0.1
@@ -88,7 +91,7 @@ if __name__ == '__main__':
         idNum += 1
 
     marker = Marker()
-    marker.header.frame_id = "map"
+    marker.header.frame_id = "LO01_odom"
     marker.type = 3
     marker.scale.x = 0.1
     marker.scale.y = 0.1
@@ -111,12 +114,15 @@ if __name__ == '__main__':
     rospy.init_node("speed_controller")
 
     r = rospy.Rate(4)
+
     sub = rospy.Subscriber("/tf", TFMessage, newOdom)
     pub = rospy.Publisher("/LO01/cmd_vel", Twist, queue_size = 1)
-    pub_marker = rospy.Publisher("/actual_goal_point", Marker, queue_size = 1)
-    pub_markerArray = rospy.Publisher("/all_goal_points", MarkerArray, queue_size = 4)
+    pub_marker = rospy.Publisher("actual_goal_point", Marker, queue_size = 1)
+    pub_markerArray = rospy.Publisher("all_goal_points", MarkerArray, queue_size = 4)
+
 
     while not rospy.is_shutdown():
+
         inc_x = goal.x -x
         inc_y = goal.y -y
 
