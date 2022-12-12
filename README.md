@@ -45,3 +45,15 @@ sudo apt-get install ros-melodic-joy
 ```
 ssh loomo@192.168.42.151
 ```
+
+## Create Waypoints
+
+To create waypoints to the loomo, you first have to ssh into the Jetson and start `roscore`.
+After that you need to use the `rosrun loomo_base loomo_odom.py ` command to initialize the starting position of the robot.
+From this point you can create your waypoints by simply using the *waypoint_creator.py* in you workspace.
+In rviz you need to use the *2D Nav Goal* and mark the points you want the robot to go.
+Finally to star the process you just need to start *waypoint_loomo.py* and the robot will go to the marked points.
+
+## Issues
+- Every time you turn on the Jetson, you first have to synchronize its time with the robot and the computer you are using, otherwise the tf messages won't work on `rviz`.
+- If the *loomo_odom.py* stops working you can use the previously added position by simply using `rosrun loomo_base loomo_odom.py --prev` command.
