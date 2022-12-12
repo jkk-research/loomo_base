@@ -21,6 +21,9 @@ def newOdom(msg):
     
     # print(msg.transforms[0].header.frame_id)
 
+    for m in msg.transforms:
+        m.header.frame_id = "LO01_origo"
+
     rot_q = msg.transforms[0].transform.rotation
     (roll, pitch, theta) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
 
@@ -66,7 +69,7 @@ if __name__ == '__main__':
     idNum = 0
     for points in goal_points:
         marker_all = Marker()
-        marker_all.header.frame_id = "LO01_odom"
+        marker_all.header.frame_id = "LO01_origo"
         marker_all.type = 3
         marker_all.id = idNum
         marker_all.scale.x = 0.1
@@ -91,11 +94,11 @@ if __name__ == '__main__':
         idNum += 1
 
     marker = Marker()
-    marker.header.frame_id = "LO01_odom"
+    marker.header.frame_id = "LO01_origo"
     marker.type = 3
-    marker.scale.x = 0.1
-    marker.scale.y = 0.1
-    marker.scale.z = 1.0
+    marker.scale.x = 0.11
+    marker.scale.y = 0.11
+    marker.scale.z = 1.01
 
     marker.color.r = 0.0
     marker.color.g = 1.0
@@ -120,7 +123,6 @@ if __name__ == '__main__':
     pub_marker = rospy.Publisher("actual_goal_point", Marker, queue_size = 1)
     pub_markerArray = rospy.Publisher("all_goal_points", MarkerArray, queue_size = 4)
 
-
     while not rospy.is_shutdown():
 
         inc_x = goal.x -x
@@ -136,7 +138,7 @@ if __name__ == '__main__':
             else:
                 speed.linear.x = 0.1
                 speed.angular.z = 0.0
-            pub.publish(speed)
+            # pub.publish(speed)
         elif pointIdx < len(goal_points):
             goal.x = goal_points[pointIdx][0]
             goal.y = goal_points[pointIdx][1]
@@ -144,7 +146,7 @@ if __name__ == '__main__':
 
         print(distance(actual_point, goal))
         print(" Goal:\n", '"', goal.x, goal.y, '"', "Idx:",pointIdx)
-        pub_marker.publish(marker)
         pub_markerArray.publish(marker_array)
+        pub_marker.publish(marker)
         
         r.sleep()  
