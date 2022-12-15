@@ -49,6 +49,7 @@ ssh loomo@192.168.42.151
 ## Create Waypoints
 
 To create waypoints to the loomo, you first have to ssh into the Jetson and start `roscore`.
+*Optional:* You can use `screen -mdS roscore_auto roscore` to run roscore in the background.
 After that you need to use the `rosrun loomo_base loomo_odom.py ` command to initialize the starting position of the robot.
 From this point you can create your waypoints by simply using the *waypoint_creator.py* in your workspace.
 In rviz you need to use the *2D Nav Goal* and mark the points you want the robot to go.

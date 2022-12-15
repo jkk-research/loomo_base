@@ -6,29 +6,14 @@ from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Point, Twist, TransformStamped
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
-from math import atan2, sqrt, pow
+from math import atan2, sqrt, pi
 import tf
 import os
 import yaml
 
-def newOdom(msg):
-    global x
-    global y
-    global theta
-
-    x = msg.transforms[0].transform.translation.x
-    y = msg.transforms[0].transform.translation.y
-    
-    # print(msg.transforms[0].header.frame_id)
-
-    for m in msg.transforms:
-        m.header.frame_id = "LO01_origo"
-
-    rot_q = msg.transforms[0].transform.rotation
-    (roll, pitch, theta) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
 
 def distance(actual, goal):
-    return sqrt(pow(actual[0]-goal.x, 2)+pow(actual[1]-goal.y, 2))
+    return sqrt((actual[0]-goal.x)**2+(actual[1]-goal.y)**2)
 
 def loadCoordinates(filePath):
     print(f"Opening: {filePath}...")
@@ -51,6 +36,11 @@ if __name__ == '__main__':
     goal_points = loadCoordinates(filePath)
     print(goal_points)
     pointIdx = 0
+
+    origoPointInit = False
+    origo_x = 0.0
+    origo_y = 0.0
+    origo_theta = 0.0
 
     x = 0.0
     y = 0.0 
@@ -118,15 +108,29 @@ if __name__ == '__main__':
 
     r = rospy.Rate(4)
 
-    sub = rospy.Subscriber("/tf", TFMessage, newOdom)
+    listener = tf.TransformListener()
+
     pub = rospy.Publisher("/LO01/cmd_vel", Twist, queue_size = 1)
     pub_marker = rospy.Publisher("actual_goal_point", Marker, queue_size = 1)
     pub_markerArray = rospy.Publisher("all_goal_points", MarkerArray, queue_size = 4)
 
     while not rospy.is_shutdown():
 
-        inc_x = goal.x -x
-        inc_y = goal.y -y
+        try:
+            (trans,rot) = listener.lookupTransform("LO01_origo", "LO01_base_link", rospy.Time(0))
+        except(tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            continue
+
+        # print(trans)
+        # print(rot)
+        
+        (roll, pitch, theta) = euler_from_quaternion([rot[0], rot[1], rot[2], rot[3]])
+
+        x = trans[0]
+        y = trans[1]
+
+        inc_x = goal.x - x
+        inc_y = goal.y - y
 
         angle_to_goal = atan2(inc_y, inc_x)
         actual_point = (x, y)
@@ -138,13 +142,16 @@ if __name__ == '__main__':
             else:
                 speed.linear.x = 0.1
                 speed.angular.z = 0.0
-            # pub.publish(speed)
+            print("Angle diff:", abs(angle_to_goal - theta))
+            pub.publish(speed)
         elif pointIdx < len(goal_points):
             goal.x = goal_points[pointIdx][0]
             goal.y = goal_points[pointIdx][1]
+            marker.pose.position.x = goal.x
+            marker.pose.position.y = goal.y
             pointIdx += 1
 
-        print(distance(actual_point, goal))
+        print("Distance: ", distance(actual_point, goal))
         print(" Goal:\n", '"', goal.x, goal.y, '"', "Idx:",pointIdx)
         pub_markerArray.publish(marker_array)
         pub_marker.publish(marker)
